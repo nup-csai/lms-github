@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-LMS Helper (lmsh) - A command-line tool for automating LMS tasks.
+LMS Helper (lmsh) 
 """
 
 import argparse
@@ -32,6 +32,8 @@ def create_assignment(args: argparse.Namespace) -> None:
     - description: Assignment description
     - due_date: Assignment due date (YYYY-MM-DD)
     - points: Maximum points available
+    - github-id: Student's GitHub ID
+    - org-id: GitHub organization ID/name
     """
     print("create_assignment command not implemented yet")
 
@@ -79,6 +81,8 @@ def setup_argparse() -> argparse.ArgumentParser:
     create_assignment_parser.add_argument("--description", help="Assignment description")
     create_assignment_parser.add_argument("--due-date", help="Due date (YYYY-MM-DD)")
     create_assignment_parser.add_argument("--points", type=int, help="Maximum points available")
+    create_assignment_parser.add_argument("--github-id", required=True, help="Student's GitHub ID")
+    create_assignment_parser.add_argument("--org-id", required=True, help="GitHub organization ID/name")
     create_assignment_parser.set_defaults(func=create_assignment)
 
     # assignment grade command
