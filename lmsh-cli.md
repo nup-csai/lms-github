@@ -1,4 +1,4 @@
-# LMS Helper (lmsh) Documentation
+# LMS Helper (lmsh)
 
 `lmsh` is a command-line tool designed to automate common Learning Management System (LMS) tasks. This guide covers installation, usage, and available commands.
 
