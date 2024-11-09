@@ -132,7 +132,3 @@ Optional parameters:
     --assignment-id "MIDTERM-2024" \
     --student-id "STUDENT456"
 ```
-
-## Note
-
-This is version 0.1.0 of the tool. Some commands are marked as "not implemented yet" and will be added in future versions. The basic command-line interface and argument parsing is set up, but the actual implementation of classroom creation, assignment management, and grading functionality is pending.
