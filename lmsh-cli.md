@@ -97,8 +97,8 @@ $lmsh assignment create \
     --description "Build a simple command-line application" \
     --due-date "2024-10-15" \
     --points 100
-    --github_id Student's GitHub ID
-    --org_id GitHub organization ID/name
+    --github-id Student's GitHub ID
+    --org-id GitHub organization ID/name
 ```
 
 3. Grading assignments automatically:
