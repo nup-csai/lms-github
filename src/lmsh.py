@@ -6,6 +6,9 @@ LMS Helper (lmsh)
 import argparse
 import sys
 from typing import Optional, List
+import os
+from github import Github, GithubException
+
 
 __version__ = "0.1.0"
 
@@ -20,8 +23,48 @@ def create_classroom(args: argparse.Namespace) -> None:
     - name: Classroom name
     - description: Classroom description
     - course_code: Course identifier
+    - org_id: GitHub organization ID/name
     """
-    print("create_classroom command not implemented yet")
+    # Get GitHub token from environment variable
+    token = os.getenv('GITHUB_TOKEN')
+    if not token:
+        print("Error: GITHUB_TOKEN environment variable not set.")
+        sys.exit(1)
+
+    # Authenticate with GitHub API
+    g = Github(token)
+
+    # Get the organization
+    try:
+        org = g.get_organization(args.org_id)
+    except GithubException as e:
+        print(f"Error: Could not access organization '{args.org_id}': {e}")
+        sys.exit(1)
+
+    # Prepare team details
+    team_name = args.name
+    team_description = args.description if args.description else ''
+    team_description += f"\nCourse Code: {args.course_code}"
+
+    # Check if team already exists
+    existing_teams = org.get_teams()
+    for team in existing_teams:
+        if team.name == team_name:
+            print(f"Error: A classroom with the name '{team_name}' already exists.")
+            sys.exit(1)
+
+    # Create the team (classroom)
+    try:
+        team = org.create_team(
+            name=team_name,
+            description=team_description,
+            privacy='closed',
+            permission='push'
+        )
+        print(f"Classroom '{team_name}' created successfully.")
+    except GithubException as e:
+        print(f"Error: Could not create classroom '{team_name}': {e}")
+        sys.exit(1)
 
 def create_assignment(args: argparse.Namespace) -> None:
     """
@@ -35,6 +78,107 @@ def create_assignment(args: argparse.Namespace) -> None:
     - github-id: Student's GitHub ID
     - org-id: GitHub organization ID/name
     """
+    # Get GitHub token from environment variable
+    token = os.getenv('GITHUB_TOKEN')
+    if not token:
+        print("Error: GITHUB_TOKEN environment variable not set.")
+        sys.exit(1)
+
+    # Authenticate with GitHub API
+    g = Github(token)
+
+    # Get the organization
+    try:
+        org = g.get_organization(args.org_id)
+    except GithubException as e:
+        print(f"Error: Could not access organization '{args.org_id}': {e}")
+        sys.exit(1)
+
+    # Get the classroom team
+    try:
+        org = g.get_organization(args.org_id)
+    except GithubException as e:
+        print(f"Error: Could not access organization '{args.org_id}': {e}")
+        sys.exit(1)
+
+        # Получение команды (класса) по ID или названию
+    team = None
+    if args.classroom_id.isdigit():
+        try:
+            team = org.get_team(int(args.classroom_id))
+        except GithubException as e:
+            print(f"Error: Could not access team with ID '{args.classroom_id}': {e}")
+            sys.exit(1)
+    else:
+        try:
+            teams = org.get_teams()
+            for t in teams:
+                if t.name.lower() == args.classroom_id.lower():
+                    team = t
+                    break
+            if not team:
+                print(f"Error: Team with name '{args.classroom_id}' not found in organization '{args.org_id}'.")
+                sys.exit(1)
+        except GithubException as e:
+            print(f"Error: Could not retrieve teams: {e}")
+            sys.exit(1)
+
+    # Define repository name (e.g., "Assignment-CS101-Midterm-Project")
+    repo_name = f"Assignment-{args.course_code}-{args.title.replace(' ', '-')}"
+
+    # Check if repository already exists
+    try:
+        repo = org.get_repo(repo_name)
+        print(f"Error: Repository '{repo_name}' already exists.")
+        sys.exit(1)
+    except GithubException:
+        pass  # Repository does not exist, proceed to create
+
+    # Prepare repository description
+    repo_description = args.description.replace('\n', ' ') if args.description else ''
+    details = []
+    if args.due_date:
+        details.append(f"Due Date: {args.due_date}")
+    if args.points:
+        details.append(f"Points: {args.points}")
+    if details:
+        # Добавляем дополнительные детали через вертикальную черту
+        repo_description += f" | {' | '.join(details)}" if repo_description else " | ".join(details)
+
+    # Create the repository
+    try:
+        repo = org.create_repo(
+            name=repo_name,
+            description=repo_description,
+            private=True,
+            has_issues=True,
+            has_projects=True,
+            has_wiki=False
+        )
+        print(f"Repository '{repo_name}' created successfully.")
+    except GithubException as e:
+        print(f"Error: Could not create repository '{repo_name}': {e}")
+        sys.exit(1)
+
+    # Add the classroom team to the repository with push access
+    try:
+        team.add_to_repos(repo)
+        print(f"Team '{team.name}' has been granted push access to '{repo_name}'.")
+    except GithubException as e:
+        print(f"Error: Could not add repository '{repo_name}' to team '{team.name}': {e}")
+        sys.exit(1)
+
+    # Optionally, initialize the repository with a README
+    try:
+        repo.create_file(
+            path="README.md",
+            message="Initial commit with assignment details",
+            content=f"# {args.title}\n\n{args.description}\n\n**Due Date**: {args.due_date}\n**Points**: {args.points}"
+        )
+        print(f"README.md created in repository '{repo_name}'.")
+    except GithubException as e:
+        print(f"Error: Could not create README.md in repository '{repo_name}': {e}")
+        sys.exit(1)
     print("create_assignment command not implemented yet")
 
 def grade_assignment(args: argparse.Namespace) -> None:
@@ -45,7 +189,6 @@ def grade_assignment(args: argparse.Namespace) -> None:
     - student_id: Optional specific student ID to grade
     - auto: Flag to enable automatic grading if available
     """
-    print("grade_assignment command not implemented yet")
 
 def setup_argparse() -> argparse.ArgumentParser:
     """Configure and return the argument parser."""
@@ -68,6 +211,7 @@ def setup_argparse() -> argparse.ArgumentParser:
     create_classroom_parser.add_argument("--name", required=True, help="Name of the classroom")
     create_classroom_parser.add_argument("--description", help="Classroom description")
     create_classroom_parser.add_argument("--course-code", required=True, help="Course identifier")
+    create_classroom_parser.add_argument("--org-id", required=True, help="Organization ID/name")
     create_classroom_parser.set_defaults(func=create_classroom)
 
     # Assignment commands
@@ -81,7 +225,8 @@ def setup_argparse() -> argparse.ArgumentParser:
     create_assignment_parser.add_argument("--description", help="Assignment description")
     create_assignment_parser.add_argument("--due-date", help="Due date (YYYY-MM-DD)")
     create_assignment_parser.add_argument("--points", type=int, help="Maximum points available")
-    create_assignment_parser.add_argument("--github-id", required=True, help="Student's GitHub ID")
+    create_assignment_parser.add_argument("--course-code", required=True, help="Course code associated with the assignment")
+    # create_assignment_parser.add_argument("--github-id", required=True, help="Student's GitHub ID")
     create_assignment_parser.add_argument("--org-id", required=True, help="GitHub organization ID/name")
     create_assignment_parser.set_defaults(func=create_assignment)
 
