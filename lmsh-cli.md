@@ -65,7 +65,7 @@ Required parameters:
 - `--classroom-id`: ID of the target classroom
 - `--title`: Assignment title
 - `--org-id`: Organization ID/name
-- `--course-code` COURSE_CODE
+- `--course-code` COURSE_CODE 
 
 Optional parameters:
 - `--description`: Assignment description
