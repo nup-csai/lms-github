@@ -31,12 +31,17 @@ $lmsh.py version
 #### Create a Classroom
 Create a new classroom with specified parameters:
 ```bash
-$lmsh classroom create --name "Course Name" --course-code "CS101" [--description "Course description"]
+$lmsh classroom create \ 
+      --name "Course Name" \
+      --course-code "CS101" \
+      --org-id ORG_ID \
+      [--description "Course description"]
 ```
 
 Required parameters:
 - `--name`: Name of the classroom
 - `--course-code`: Course identifier
+- `--org-id`: Organization ID/name
 
 Optional parameters:
 - `--description`: Classroom description
@@ -49,6 +54,8 @@ Create a new assignment in a specified classroom:
 $lmsh assignment create \
     --classroom-id "CLASS123" \
     --title "Assignment Title" \
+    --course-code "COURSE_CODE" \
+    --org-id ORG_ID \
     [--description "Assignment description"] \
     [--due-date "2024-12-31"] \
     [--points 100]
@@ -57,6 +64,8 @@ $lmsh assignment create \
 Required parameters:
 - `--classroom-id`: ID of the target classroom
 - `--title`: Assignment title
+- `--org-id`: Organization ID/name
+- `--course-code` COURSE_CODE
 
 Optional parameters:
 - `--description`: Assignment description
@@ -86,6 +95,7 @@ Optional parameters:
 $lmsh classroom create \
     --name "Introduction to Computer Science" \
     --course-code "CS101" \
+    --org-id "lmsh-test" \
     --description "Fall 2024 - Introduction to programming concepts"
 ```
 
@@ -96,8 +106,8 @@ $lmsh assignment create \
     --title "Midterm Project" \
     --description "Build a simple command-line application" \
     --due-date "2024-10-15" \
-    --points 100
-    --github-id Student's GitHub ID
+    --points 100 \
+    --github-id Student's GitHub ID \
     --org-id GitHub organization ID/name
 ```
 
