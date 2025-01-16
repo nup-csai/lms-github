@@ -8,6 +8,8 @@ RUN apt-get update
 #RUN apt-get install -y htop vim git net-tools psmisc
 
 COPY ./api /app/
+COPY ./utils /app/
+COPY ./tests /app/
 RUN mkdir -p /data
 
 RUN pip3 install --upgrade pip
